@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Food Delivery</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/main.js" defer></script>
+</head>
+<body>
+    <% if (success) { %>
+    <div data-success="<%= success %>" style="display: none;"></div>
+    <% } %>
+    <% if (error) { %>
+    <div data-error="<%= error %>" style="display: none;"></div>
+    <% } %>
+
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>🍔 FoodDelivery</h1>
+            </div>
+            <div class="nav-links">
+                <span class="user-info">Welcome, <%= restaurant.restaurant_name %>!</span>
+                <a href="/restaurant/orders" class="btn btn-primary">Orders</a>
+                <a href="/restaurant/menu" class="btn btn-outline">Menu</a>
+                <a href="/auth/logout" class="btn btn-outline">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="dashboard">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">Restaurant Dashboard</h1>
+                <p class="dashboard-subtitle"><%= restaurant.restaurant_name %> - Manage your orders and menu</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value"><%= pendingOrders %></div>
+                    <div class="stat-label">Pending Orders</div>
+                </div>
+                <div class="stat-card secondary">
+                    <div class="stat-value"><%= preparingOrders %></div>
+                    <div class="stat-label">Preparing</div>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-value"><%= readyOrders %></div>
+                    <div class="stat-label">Ready for Pickup</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);">
+                    <div class="stat-value">$<%= totalRevenue %></div>
+                    <div class="stat-label">Total Revenue</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header d-flex justify-between align-center">
+                    <h2 class="card-title">Quick Actions</h2>
+                </div>
+                <div class="card-body">
+                    <div class="grid grid-3">
+                        <a href="/restaurant/orders?status=pending" class="card" style="text-decoration: none; color: inherit;">
+                            <h3 style="color: var(--primary-color); margin-bottom: 0.5rem;">📦 View Orders</h3>
+                            <p style="color: var(--medium-gray); margin: 0;">Manage incoming orders</p>
+                        </a>
+                        <a href="/restaurant/menu" class="card" style="text-decoration: none; color: inherit;">
+                            <h3 style="color: var(--primary-color); margin-bottom: 0.5rem;">🍽️ Manage Menu</h3>
+                            <p style="color: var(--medium-gray); margin: 0;">Add, edit, or remove menu items</p>
+                        </a>
+                        <a href="/restaurant/menu/add" class="card" style="text-decoration: none; color: inherit;">
+                            <h3 style="color: var(--primary-color); margin-bottom: 0.5rem;">➕ Add Menu Item</h3>
+                            <p style="color: var(--medium-gray); margin: 0;">Add a new item to your menu</p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <% if (recentOrders && recentOrders.length > 0) { %>
+            <div class="card">
+                <div class="card-header d-flex justify-between align-center">
+                    <h2 class="card-title">Recent Orders</h2>
+                    <a href="/restaurant/orders" class="btn btn-outline btn-small">View All</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Customer</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% recentOrders.forEach(order => { %>
+                                <tr>
+                                    <td>#<%= order.order_id %></td>
+                                    <td><%= order.customer_name %></td>
+                                    <td>$<%= parseFloat(order.total_amount).toFixed(2) %></td>
+                                    <td>
+                                        <span class="badge badge-<%= order.order_status %>">
+                                            <%= order.order_status %>
+                                        </span>
+                                    </td>
+                                    <td><%= new Date(order.created_at).toLocaleDateString() %></td>
+                                    <td>
+                                        <a href="/restaurant/orders/<%= order.order_id %>" class="btn btn-outline btn-small">View</a>
+                                    </td>
+                                </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <% } else { %>
+            <div class="card">
+                <div class="card-body text-center">
+                    <p style="color: var(--medium-gray); font-size: 1.1rem; margin-bottom: 1rem;">
+                        No orders yet. Orders will appear here when customers place them.
+                    </p>
+                    <a href="/restaurant/menu" class="btn btn-primary">Manage Menu</a>
+                </div>
+            </div>
+            <% } %>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Food Delivery System. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

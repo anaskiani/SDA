@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Food Delivery</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/main.js" defer></script>
+</head>
+<body>
+    <% if (success) { %>
+    <div data-success="<%= success %>" style="display: none;"></div>
+    <% } %>
+    <% if (error) { %>
+    <div data-error="<%= error %>" style="display: none;"></div>
+    <% } %>
+
+    <div class="container">
+        <div class="error-page">
+            <div class="error-content">
+                <h1 class="error-code"><%= error.status %></h1>
+                <h2 class="error-message"><%= error.message %></h2>
+                <div class="error-actions">
+                    <a href="/" class="btn btn-primary">Go Home</a>
+                    <% if (isAuthenticated) { %>
+                        <a href="/<%= user.role %>/dashboard" class="btn btn-secondary">Dashboard</a>
+                    <% } else { %>
+                        <a href="/auth/login" class="btn btn-secondary">Login</a>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

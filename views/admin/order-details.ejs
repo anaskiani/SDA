@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Food Delivery</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/main.js" defer></script>
+</head>
+<body>
+    <% if (success) { %>
+    <div data-success="<%= success %>" style="display: none;"></div>
+    <% } %>
+    <% if (error) { %>
+    <div data-error="<%= error %>" style="display: none;"></div>
+    <% } %>
+
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>🍔 FoodDelivery</h1>
+            </div>
+            <div class="nav-links">
+                <span class="user-info">Welcome, <%= user.full_name %>!</span>
+                <a href="/admin/orders" class="btn btn-outline">Back to Orders</a>
+                <a href="/auth/logout" class="btn btn-outline">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="dashboard">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">Order #<%= order.order_id %></h1>
+                <p class="dashboard-subtitle">Order Details</p>
+            </div>
+
+            <div class="grid grid-2">
+                <div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Order Information</h2>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Status:</strong> 
+                                <span class="badge badge-<%= order.order_status %>">
+                                    <%= order.order_status %>
+                                </span>
+                            </p>
+                            <p><strong>Customer:</strong> <%= order.customer_name %></p>
+                            <p><strong>Restaurant:</strong> <%= order.restaurant_name %></p>
+                            <% if (order.rider_name) { %>
+                            <p><strong>Rider:</strong> <%= order.rider_name %></p>
+                            <% } else { %>
+                            <p><strong>Rider:</strong> Not assigned</p>
+                            <% } %>
+                            <p><strong>Order Date:</strong> <%= new Date(order.created_at).toLocaleString() %></p>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Delivery Address</h2>
+                        </div>
+                        <div class="card-body">
+                            <p><%= order.delivery_address %></p>
+                            <% if (order.special_instructions) { %>
+                            <p style="margin-top: 1rem;"><strong>Special Instructions:</strong></p>
+                            <p><%= order.special_instructions %></p>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <% if (order.payment) { %>
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Payment Information</h2>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Payment Method:</strong> <%= order.payment.payment_method %></p>
+                            <p><strong>Payment Status:</strong> 
+                                <span class="badge badge-<%= order.payment.payment_status %>">
+                                    <%= order.payment.payment_status %>
+                                </span>
+                            </p>
+                            <p><strong>Amount:</strong> $<%= parseFloat(order.payment.amount).toFixed(2) %></p>
+                        </div>
+                    </div>
+                    <% } %>
+                </div>
+
+                <div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Order Items</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Item</th>
+                                            <th>Quantity</th>
+                                            <th>Price</th>
+                                            <th>Subtotal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% order.items.forEach(item => { %>
+                                        <tr>
+                                            <td><%= item.item_name %></td>
+                                            <td><%= item.quantity %></td>
+                                            <td>$<%= parseFloat(item.price).toFixed(2) %></td>
+                                            <td>$<%= parseFloat(item.subtotal).toFixed(2) %></td>
+                                        </tr>
+                                        <% }); %>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr style="font-weight: 600; font-size: 1.1rem;">
+                                            <td colspan="3">Total:</td>
+                                            <td>$<%= parseFloat(order.total_amount).toFixed(2) %></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <% if (order.order_status === 'ready' && !order.rider_id) { %>
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Assign Rider</h2>
+                        </div>
+                        <div class="card-body">
+                            <% if (availableRiders && availableRiders.length > 0) { %>
+                            <form id="assign-rider-form">
+                                <div class="form-group">
+                                    <label for="rider_id" class="form-label">Select Available Rider</label>
+                                    <select id="rider_id" name="rider_id" class="form-control" required>
+                                        <option value="">Choose a rider...</option>
+                                        <% availableRiders.forEach(rider => { %>
+                                        <option value="<%= rider.rider_id %>">
+                                            <%= rider.full_name %> - <%= rider.vehicle_type || 'Vehicle' %>
+                                        </option>
+                                        <% }); %>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Assign Rider</button>
+                            </form>
+                            <% } else { %>
+                            <p style="color: var(--medium-gray);">No available riders at the moment.</p>
+                            <% } %>
+                        </div>
+                    </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Food Delivery System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        const assignRiderForm = document.getElementById('assign-rider-form');
+        if (assignRiderForm) {
+            assignRiderForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const data = Object.fromEntries(formData);
+
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Assigning...';
+
+                try {
+                    const response = await fetch(`/admin/orders/<%= order.order_id %>/assign-rider`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        alert('Rider assigned successfully!');
+                        location.reload();
+                    } else {
+                        alert(result.error || 'Failed to assign rider');
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Assign Rider';
+                    }
+                } catch (error) {
+                    alert('An error occurred. Please try again.');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Assign Rider';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Food Delivery</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/main.js" defer></script>
+</head>
+<body>
+    <% if (success) { %>
+    <div data-success="<%= success %>" style="display: none;"></div>
+    <% } %>
+    <% if (error) { %>
+    <div data-error="<%= error %>" style="display: none;"></div>
+    <% } %>
+
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>🍔 FoodDelivery</h1>
+            </div>
+            <div class="nav-links">
+                <span class="user-info">Welcome, <%= rider.full_name %>!</span>
+                <a href="/rider/dashboard" class="btn btn-outline">Dashboard</a>
+                <a href="/rider/orders" class="btn btn-outline">My Orders</a>
+                <a href="/auth/logout" class="btn btn-outline">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="dashboard">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">Available Orders</h1>
+                <p class="dashboard-subtitle">Orders ready for pickup</p>
+            </div>
+
+            <% if (!rider.is_available) { %>
+            <div class="alert alert-warning">
+                <strong>Note:</strong> You are currently unavailable. Set yourself as available to pick up orders.
+            </div>
+            <% } %>
+
+            <% if (readyOrders && readyOrders.length > 0) { %>
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Restaurant</th>
+                                    <th>Customer</th>
+                                    <th>Amount</th>
+                                    <th>Restaurant Address</th>
+                                    <th>Delivery Address</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% readyOrders.forEach(order => { %>
+                                <tr>
+                                    <td>#<%= order.order_id %></td>
+                                    <td><%= order.restaurant_name %></td>
+                                    <td><%= order.customer_name %></td>
+                                    <td>$<%= parseFloat(order.total_amount).toFixed(2) %></td>
+                                    <td><%= order.restaurant_address %></td>
+                                    <td><%= order.delivery_address %></td>
+                                    <td><%= new Date(order.created_at).toLocaleString() %></td>
+                                    <td>
+                                        <a href="/rider/orders/<%= order.order_id %>" class="btn btn-primary btn-small">View & Pickup</a>
+                                    </td>
+                                </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <% } else { %>
+            <div class="card">
+                <div class="card-body text-center">
+                    <p style="color: var(--medium-gray); font-size: 1.1rem;">
+                        No orders available for pickup at the moment.
+                    </p>
+                </div>
+            </div>
+            <% } %>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Food Delivery System. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

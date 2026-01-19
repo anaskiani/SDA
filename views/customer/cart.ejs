@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Food Delivery</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/main.js" defer></script>
+</head>
+<body>
+    <% if (success) { %>
+    <div data-success="<%= success %>" style="display: none;"></div>
+    <% } %>
+    <% if (error) { %>
+    <div data-error="<%= error %>" style="display: none;"></div>
+    <% } %>
+
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>🍔 FoodDelivery</h1>
+            </div>
+            <div class="nav-links">
+                <span class="user-info">Welcome, <%= user.full_name %>!</span>
+                <a href="/customer/restaurants" class="btn btn-outline">Browse Restaurants</a>
+                <a href="/customer/dashboard" class="btn btn-outline">Dashboard</a>
+                <a href="/auth/logout" class="btn btn-outline">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="dashboard">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">Shopping Cart</h1>
+                <p class="dashboard-subtitle">Review your items before checkout</p>
+            </div>
+
+            <% if (cart && cart.length > 0) { %>
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th>Subtotal</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% cart.forEach(item => { %>
+                                <tr>
+                                    <td><strong><%= item.item_name %></strong></td>
+                                    <td>$<%= parseFloat(item.price).toFixed(2) %></td>
+                                    <td>
+                                        <input 
+                                            type="number" 
+                                            class="quantity-input form-control" 
+                                            data-item-id="<%= item.item_id %>"
+                                            value="<%= item.quantity %>" 
+                                            min="1" 
+                                            style="width: 80px;"
+                                        >
+                                    </td>
+                                    <td>$<%= parseFloat(item.subtotal).toFixed(2) %></td>
+                                    <td>
+                                        <button 
+                                            class="btn btn-danger btn-small remove-item" 
+                                            data-item-id="<%= item.item_id %>"
+                                        >
+                                            Remove
+                                        </button>
+                                    </td>
+                                </tr>
+                                <% }); %>
+                            </tbody>
+                            <tfoot>
+                                <tr style="font-weight: 600; font-size: 1.1rem;">
+                                    <td colspan="3" style="text-align: right;">Total:</td>
+                                    <td>$<%= total %></td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-between align-center">
+                        <a href="/customer/restaurants" class="btn btn-outline">Continue Shopping</a>
+                        <a href="/customer/checkout" class="btn btn-primary btn-large">Proceed to Checkout</a>
+                    </div>
+                </div>
+            </div>
+            <% } else { %>
+            <div class="card">
+                <div class="card-body text-center">
+                    <p style="color: var(--medium-gray); font-size: 1.1rem; margin-bottom: 1rem;">
+                        Your cart is empty.
+                    </p>
+                    <a href="/customer/restaurants" class="btn btn-primary">Browse Restaurants</a>
+                </div>
+            </div>
+            <% } %>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Food Delivery System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Update quantity
+        const quantityInputs = document.querySelectorAll('.quantity-input');
+        if (quantityInputs.length > 0) {
+            quantityInputs.forEach(input => {
+            input.addEventListener('change', async function() {
+                const itemId = this.dataset.itemId;
+                const quantity = parseInt(this.value);
+
+                try {
+                    const response = await fetch('/customer/cart/update', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            item_id: itemId,
+                            quantity: quantity
+                        })
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        location.reload();
+                    } else {
+                        alert(result.error || 'Failed to update cart');
+                    }
+                } catch (error) {
+                    alert('An error occurred. Please try again.');
+                }
+            });
+        });
+        }
+
+        // Remove item
+        const removeButtons = document.querySelectorAll('.remove-item');
+        if (removeButtons.length > 0) {
+            removeButtons.forEach(button => {
+            button.addEventListener('click', async function() {
+                const itemId = this.dataset.itemId;
+
+                if (!confirm('Remove this item from cart?')) return;
+
+                try {
+                    const response = await fetch(`/customer/cart/remove/${itemId}`, {
+                        method: 'DELETE'
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        location.reload();
+                    } else {
+                        alert(result.error || 'Failed to remove item');
+                    }
+                } catch (error) {
+                    alert('An error occurred. Please try again.');
+                }
+            });
+        });
+        }
+    </script>
+</body>
+</html>

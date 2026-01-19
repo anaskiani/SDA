@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Food Delivery</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/main.js" defer></script>
+</head>
+<body>
+    <% if (success) { %>
+    <div data-success="<%= success %>" style="display: none;"></div>
+    <% } %>
+    <% if (error) { %>
+    <div data-error="<%= error %>" style="display: none;"></div>
+    <% } %>
+
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>🍔 FoodDelivery</h1>
+            </div>
+            <div class="nav-links">
+                <span class="user-info">Welcome, <%= restaurant.restaurant_name %>!</span>
+                <a href="/restaurant/menu" class="btn btn-outline">Back to Menu</a>
+                <a href="/auth/logout" class="btn btn-outline">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="dashboard">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1 class="dashboard-title"><%= isEdit ? 'Edit Menu Item' : 'Add Menu Item' %></h1>
+                <p class="dashboard-subtitle"><%= isEdit ? 'Update menu item details' : 'Add a new item to your menu' %></p>
+            </div>
+
+            <div class="card" style="max-width: 600px; margin: 0 auto;">
+                <div class="card-body">
+                    <form id="menu-item-form">
+                        <div class="form-group">
+                            <label for="item_name" class="form-label">Item Name *</label>
+                            <input 
+                                type="text" 
+                                id="item_name" 
+                                name="item_name" 
+                                class="form-control" 
+                                placeholder="Enter item name"
+                                value="<%= menuItem ? menuItem.item_name : '' %>"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea 
+                                id="description" 
+                                name="description" 
+                                class="form-control" 
+                                rows="3"
+                                placeholder="Enter item description"
+                            ><%= menuItem ? menuItem.description || '' : '' %></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="price" class="form-label">Price *</label>
+                            <input 
+                                type="number" 
+                                id="price" 
+                                name="price" 
+                                class="form-control" 
+                                placeholder="0.00"
+                                step="0.01"
+                                min="0"
+                                value="<%= menuItem ? menuItem.price : '' %>"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="category" class="form-label">Category</label>
+                            <input 
+                                type="text" 
+                                id="category" 
+                                name="category" 
+                                class="form-control" 
+                                placeholder="e.g., Pizza, Burgers, Salads"
+                                value="<%= menuItem ? menuItem.category || '' : '' %>"
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="image_url" class="form-label">Image URL (Optional)</label>
+                            <input 
+                                type="url" 
+                                id="image_url" 
+                                name="image_url" 
+                                class="form-control" 
+                                placeholder="https://example.com/image.jpg"
+                                value="<%= menuItem ? menuItem.image_url || '' : '' %>"
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Availability</label>
+                            <div>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                    <input 
+                                        type="radio" 
+                                        name="is_available" 
+                                        value="true" 
+                                        <%= !menuItem || menuItem.is_available ? 'checked' : '' %>
+                                    >
+                                    <span>Available</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; margin-top: 0.5rem;">
+                                    <input 
+                                        type="radio" 
+                                        name="is_available" 
+                                        value="false"
+                                        <%= menuItem && !menuItem.is_available ? 'checked' : '' %>
+                                    >
+                                    <span>Unavailable</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">
+                                <%= isEdit ? 'Update Menu Item' : 'Add Menu Item' %>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Food Delivery System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        const menuItemForm = document.getElementById('menu-item-form');
+        if (menuItemForm) {
+            menuItemForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const data = Object.fromEntries(formData);
+
+                <% if (isEdit) { %>
+                const url = '/restaurant/menu/edit/<%= menuItem.item_id %>';
+                <% } else { %>
+                const url = '/restaurant/menu/add';
+                <% } %>
+                const method = 'POST';
+
+                try {
+                    const response = await fetch(url, {
+                        method: method,
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        <% if (isEdit) { %>
+                        alert('Menu item updated successfully!');
+                        <% } else { %>
+                        alert('Menu item added successfully!');
+                        <% } %>
+                        window.location.href = '/restaurant/menu';
+                    } else {
+                        alert(result.error || 'Failed to save menu item');
+                    }
+                } catch (error) {
+                    alert('An error occurred. Please try again.');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

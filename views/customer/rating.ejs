@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Food Delivery</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/main.js" defer></script>
+</head>
+<body>
+    <% if (success) { %>
+    <div data-success="<%= success %>" style="display: none;"></div>
+    <% } %>
+    <% if (error) { %>
+    <div data-error="<%= error %>" style="display: none;"></div>
+    <% } %>
+
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>🍔 FoodDelivery</h1>
+            </div>
+            <div class="nav-links">
+                <span class="user-info">Welcome, <%= user.full_name %>!</span>
+                <a href="/customer/orders/<%= order.order_id %>" class="btn btn-outline">Back to Order</a>
+                <a href="/auth/logout" class="btn btn-outline">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="dashboard">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">Rate Your Order</h1>
+                <p class="dashboard-subtitle">Order #<%= order.order_id %> - <%= order.restaurant_name %></p>
+            </div>
+
+            <div class="card" style="max-width: 600px; margin: 0 auto;">
+                <div class="card-body">
+                    <form id="rating-form">
+                        <div class="form-group">
+                            <label class="form-label">Restaurant Rating *</label>
+                            <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                                <% for (let i = 1; i <= 5; i++) { %>
+                                <label style="cursor: pointer; font-size: 2rem;">
+                                    <input type="radio" name="restaurant_rating" value="<%= i %>" required style="display: none;">
+                                    <span class="star-rating" data-rating="<%= i %>">⭐</span>
+                                </label>
+                                <% } %>
+                            </div>
+                        </div>
+
+                        <% if (order.rider_name) { %>
+                        <div class="form-group">
+                            <label class="form-label">Rider Rating</label>
+                            <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                                <% for (let i = 1; i <= 5; i++) { %>
+                                <label style="cursor: pointer; font-size: 2rem;">
+                                    <input type="radio" name="rider_rating" value="<%= i %>" style="display: none;">
+                                    <span class="star-rating" data-rating="<%= i %>">⭐</span>
+                                </label>
+                                <% } %>
+                            </div>
+                        </div>
+                        <% } %>
+
+                        <div class="form-group">
+                            <label for="feedback" class="form-label">Feedback (Optional)</label>
+                            <textarea 
+                                id="feedback" 
+                                name="feedback" 
+                                class="form-control" 
+                                rows="4"
+                                placeholder="Share your experience..."
+                            ></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">
+                                Submit Rating
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Food Delivery System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Star rating interaction
+        const starRatings = document.querySelectorAll('.star-rating');
+        if (starRatings.length > 0) {
+            starRatings.forEach(star => {
+            star.addEventListener('click', function() {
+                const rating = parseInt(this.dataset.rating);
+                const radio = this.previousElementSibling;
+                const group = radio.closest('.form-group');
+                
+                // Set the radio button
+                radio.checked = true;
+                
+                // Update star colors
+                group.querySelectorAll('.star-rating').forEach((s, index) => {
+                    if (index < rating) {
+                        s.style.color = '#ffc107';
+                    } else {
+                        s.style.color = '#ccc';
+                    }
+                });
+            });
+
+            star.addEventListener('mouseenter', function() {
+                const rating = parseInt(this.dataset.rating);
+                const group = this.closest('.form-group');
+                group.querySelectorAll('.star-rating').forEach((s, index) => {
+                    if (index < rating) {
+                        s.style.color = '#ffc107';
+                    }
+                });
+            });
+        });
+        }
+
+        // Form submission
+        const ratingForm = document.getElementById('rating-form');
+        if (ratingForm) {
+            ratingForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+
+            try {
+                const response = await fetch('/customer/orders/<%= order.order_id %>/rate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('Thank you for your feedback!');
+                    window.location.href = '/customer/orders/<%= order.order_id %>';
+                } else {
+                    alert(result.error || 'Failed to submit rating');
+                }
+            } catch (error) {
+                alert('An error occurred. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>

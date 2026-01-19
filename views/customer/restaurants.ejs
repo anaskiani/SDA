@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Food Delivery</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/main.js" defer></script>
+</head>
+<body>
+    <% if (success) { %>
+    <div data-success="<%= success %>" style="display: none;"></div>
+    <% } %>
+    <% if (error) { %>
+    <div data-error="<%= error %>" style="display: none;"></div>
+    <% } %>
+
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>🍔 FoodDelivery</h1>
+            </div>
+            <div class="nav-links">
+                <span class="user-info">Welcome, <%= user.full_name %>!</span>
+                <a href="/customer/dashboard" class="btn btn-outline">Dashboard</a>
+                <a href="/customer/cart" class="btn btn-outline">Cart</a>
+                <a href="/auth/logout" class="btn btn-outline">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="dashboard">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">Browse Restaurants</h1>
+                <p class="dashboard-subtitle">Choose from our selection of amazing restaurants</p>
+            </div>
+
+            <% if (restaurants && restaurants.length > 0) { %>
+            <div class="grid grid-3">
+                <% restaurants.forEach(restaurant => { %>
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title" style="margin-bottom: 0.5rem;"><%= restaurant.restaurant_name %></h2>
+                        <span class="badge" style="background-color: var(--info-color); color: white;">
+                            <%= restaurant.cuisine_type %>
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <p style="color: var(--medium-gray); margin-bottom: 1rem;">
+                            <%= restaurant.description || 'Delicious food awaits!' %>
+                        </p>
+                        <p style="font-size: 0.9rem; color: var(--medium-gray); margin-bottom: 0.5rem;">
+                            📍 <%= restaurant.address %>
+                        </p>
+                        <p style="font-size: 0.9rem; color: var(--medium-gray); margin-bottom: 1rem;">
+                            🕐 <%= restaurant.opening_time %> - <%= restaurant.closing_time %>
+                        </p>
+                        <a href="/customer/restaurants/<%= restaurant.restaurant_id %>/menu" class="btn btn-primary" style="width: 100%;">
+                            View Menu
+                        </a>
+                    </div>
+                </div>
+                <% }); %>
+            </div>
+            <% } else { %>
+            <div class="card">
+                <div class="card-body text-center">
+                    <p style="color: var(--medium-gray); font-size: 1.1rem;">
+                        No restaurants available at the moment.
+                    </p>
+                </div>
+            </div>
+            <% } %>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Food Delivery System. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

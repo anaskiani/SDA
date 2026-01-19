@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Food Delivery</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/main.js" defer></script>
+</head>
+<body>
+    <% if (success) { %>
+    <div data-success="<%= success %>" style="display: none;"></div>
+    <% } %>
+    <% if (error) { %>
+    <div data-error="<%= error %>" style="display: none;"></div>
+    <% } %>
+
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>🍔 FoodDelivery</h1>
+            </div>
+            <div class="nav-links">
+                <span class="user-info">Welcome, <%= restaurant.restaurant_name %>!</span>
+                <a href="/restaurant/orders" class="btn btn-outline">Back to Orders</a>
+                <a href="/auth/logout" class="btn btn-outline">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="dashboard">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">Order #<%= order.order_id %></h1>
+                <p class="dashboard-subtitle">Order Details</p>
+            </div>
+
+            <div class="grid grid-2">
+                <div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Order Information</h2>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Status:</strong> 
+                                <span class="badge badge-<%= order.order_status %>">
+                                    <%= order.order_status %>
+                                </span>
+                            </p>
+                            <p><strong>Customer:</strong> <%= order.customer_name %></p>
+                            <p><strong>Phone:</strong> <%= order.customer_phone || 'N/A' %></p>
+                            <p><strong>Order Date:</strong> <%= new Date(order.created_at).toLocaleString() %></p>
+                            <% if (order.rider_name) { %>
+                            <p><strong>Rider:</strong> <%= order.rider_name %></p>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Delivery Address</h2>
+                        </div>
+                        <div class="card-body">
+                            <p><%= order.delivery_address %></p>
+                            <% if (order.special_instructions) { %>
+                            <p style="margin-top: 1rem;"><strong>Special Instructions:</strong></p>
+                            <p><%= order.special_instructions %></p>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <% if (order.payment) { %>
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Payment Information</h2>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Payment Method:</strong> <%= order.payment.payment_method %></p>
+                            <p><strong>Payment Status:</strong> 
+                                <span class="badge badge-<%= order.payment.payment_status %>">
+                                    <%= order.payment.payment_status %>
+                                </span>
+                            </p>
+                            <p><strong>Amount:</strong> $<%= parseFloat(order.payment.amount).toFixed(2) %></p>
+                        </div>
+                    </div>
+                    <% } %>
+                </div>
+
+                <div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Order Items</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Item</th>
+                                            <th>Quantity</th>
+                                            <th>Price</th>
+                                            <th>Subtotal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% order.items.forEach(item => { %>
+                                        <tr>
+                                            <td><%= item.item_name %></td>
+                                            <td><%= item.quantity %></td>
+                                            <td>$<%= parseFloat(item.price).toFixed(2) %></td>
+                                            <td>$<%= parseFloat(item.subtotal).toFixed(2) %></td>
+                                        </tr>
+                                        <% }); %>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr style="font-weight: 600; font-size: 1.1rem;">
+                                            <td colspan="3">Total:</td>
+                                            <td>$<%= parseFloat(order.total_amount).toFixed(2) %></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Order Actions</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex gap-2" style="flex-wrap: wrap;">
+                                <% if (canAccept) { %>
+                                <button class="btn btn-success accept-order" data-order-id="<%= order.order_id %>">
+                                    Accept Order
+                                </button>
+                                <% } %>
+                                
+                                <% if (canReject) { %>
+                                <button class="btn btn-danger reject-order" data-order-id="<%= order.order_id %>">
+                                    Reject Order
+                                </button>
+                                <% } %>
+                                
+                                <% if (canPrepare) { %>
+                                <button class="btn btn-warning mark-preparing" data-order-id="<%= order.order_id %>">
+                                    Mark as Preparing
+                                </button>
+                                <% } %>
+                                
+                                <% if (canMarkReady) { %>
+                                <button class="btn btn-primary mark-ready" data-order-id="<%= order.order_id %>">
+                                    Mark as Ready
+                                </button>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Food Delivery System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Accept order
+        const acceptBtns = document.querySelectorAll('.accept-order');
+        if (acceptBtns.length > 0) {
+            acceptBtns.forEach(btn => {
+            btn.addEventListener('click', async function() {
+                if (!confirm('Accept this order?')) return;
+                const orderId = this.dataset.orderId;
+                
+                try {
+                    const response = await fetch(`/restaurant/orders/${orderId}/accept`, {
+                        method: 'POST'
+                    });
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        alert('Order accepted!');
+                        location.reload();
+                    } else {
+                        alert(result.error || 'Failed to accept order');
+                    }
+                } catch (error) {
+                    alert('An error occurred. Please try again.');
+                }
+            });
+        });
+        }
+
+        // Reject order
+        const rejectBtns = document.querySelectorAll('.reject-order');
+        if (rejectBtns.length > 0) {
+            rejectBtns.forEach(btn => {
+            btn.addEventListener('click', async function() {
+                if (!confirm('Reject this order? This action cannot be undone.')) return;
+                const orderId = this.dataset.orderId;
+                
+                try {
+                    const response = await fetch(`/restaurant/orders/${orderId}/reject`, {
+                        method: 'POST'
+                    });
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        alert('Order rejected');
+                        location.reload();
+                    } else {
+                        alert(result.error || 'Failed to reject order');
+                    }
+                } catch (error) {
+                    alert('An error occurred. Please try again.');
+                }
+            });
+        });
+        }
+
+        // Mark as preparing
+        const preparingBtns = document.querySelectorAll('.mark-preparing');
+        if (preparingBtns.length > 0) {
+            preparingBtns.forEach(btn => {
+            btn.addEventListener('click', async function() {
+                const orderId = this.dataset.orderId;
+                
+                try {
+                    const response = await fetch(`/restaurant/orders/${orderId}/preparing`, {
+                        method: 'POST'
+                    });
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        alert('Order marked as preparing');
+                        location.reload();
+                    } else {
+                        alert(result.error || 'Failed to update order');
+                    }
+                } catch (error) {
+                    alert('An error occurred. Please try again.');
+                }
+            });
+        });
+        }
+
+        // Mark as ready
+        const readyBtns = document.querySelectorAll('.mark-ready');
+        if (readyBtns.length > 0) {
+            readyBtns.forEach(btn => {
+            btn.addEventListener('click', async function() {
+                const orderId = this.dataset.orderId;
+                
+                try {
+                    const response = await fetch(`/restaurant/orders/${orderId}/ready`, {
+                        method: 'POST'
+                    });
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        alert('Order marked as ready for pickup');
+                        location.reload();
+                    } else {
+                        alert(result.error || 'Failed to update order');
+                    }
+                } catch (error) {
+                    alert('An error occurred. Please try again.');
+                }
+            });
+        });
+        }
+    </script>
+</body>
+</html>

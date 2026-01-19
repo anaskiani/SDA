@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Food Delivery</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/main.js" defer></script>
+</head>
+<body>
+    <% if (success) { %>
+    <div data-success="<%= success %>" style="display: none;"></div>
+    <% } %>
+    <% if (error) { %>
+    <div data-error="<%= error %>" style="display: none;"></div>
+    <% } %>
+
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>🍔 FoodDelivery</h1>
+            </div>
+            <div class="nav-links">
+                <a href="/" class="btn btn-outline">Home</a>
+                <a href="/auth/login" class="btn btn-primary">Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="dashboard">
+        <div class="container">
+            <div style="max-width: 600px; margin: 3rem auto;">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Create Your Account</h2>
+                        <p style="color: var(--medium-gray); margin: 0;">Join us and start ordering delicious food!</p>
+                    </div>
+                    <div class="card-body">
+                        <% if (error) { %>
+                            <div class="alert alert-danger">
+                                <%= error %>
+                            </div>
+                        <% } %>
+                        
+                        <% if (success) { %>
+                            <div class="alert alert-success">
+                                <%= success %>
+                            </div>
+                        <% } %>
+
+                        <form action="/auth/register" method="POST">
+                            <div class="form-group">
+                                <label for="role" class="form-label">I want to register as:</label>
+                                <select id="role" name="role" class="form-control" required>
+                                    <option value="">Select your role</option>
+                                    <% roles.forEach(role => { %>
+                                        <option value="<%= role %>" <%= (typeof formData !== 'undefined' && formData && formData.role === role) ? 'selected' : '' %>>
+                                            <%= role.charAt(0).toUpperCase() + role.slice(1) %>
+                                        </option>
+                                    <% }); %>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="full_name" class="form-label">Full Name</label>
+                                <input 
+                                    type="text" 
+                                    id="full_name" 
+                                    name="full_name" 
+                                    class="form-control" 
+                                    placeholder="Enter your full name"
+                                    value="<%= (typeof formData !== 'undefined' && formData && formData.full_name) ? formData.full_name : '' %>"
+                                    required
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="username" class="form-label">Username</label>
+                                <input 
+                                    type="text" 
+                                    id="username" 
+                                    name="username" 
+                                    class="form-control" 
+                                    placeholder="Choose a username"
+                                    value="<%= (typeof formData !== 'undefined' && formData && formData.username) ? formData.username : '' %>"
+                                    required
+                                >
+                                <small class="form-error">Username can only contain letters, numbers, and underscores</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="email" class="form-label">Email Address</label>
+                                <input 
+                                    type="email" 
+                                    id="email" 
+                                    name="email" 
+                                    class="form-control" 
+                                    placeholder="Enter your email"
+                                    value="<%= (typeof formData !== 'undefined' && formData && formData.email) ? formData.email : '' %>"
+                                    required
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="phone" class="form-label">Phone Number (Optional)</label>
+                                <input 
+                                    type="tel" 
+                                    id="phone" 
+                                    name="phone" 
+                                    class="form-control" 
+                                    placeholder="Enter your phone number"
+                                    value="<%= (typeof formData !== 'undefined' && formData && formData.phone) ? formData.phone : '' %>"
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="address" class="form-label">Address (Optional)</label>
+                                <textarea 
+                                    id="address" 
+                                    name="address" 
+                                    class="form-control" 
+                                    placeholder="Enter your address"
+                                    rows="3"
+                                ><%= (typeof formData !== 'undefined' && formData && formData.address) ? formData.address : '' %></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="password" class="form-label">Password</label>
+                                <input 
+                                    type="password" 
+                                    id="password" 
+                                    name="password" 
+                                    class="form-control" 
+                                    placeholder="Create a password"
+                                    required
+                                >
+                                <small class="form-error">Password must be at least 6 characters with uppercase, lowercase, and number</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="confirmPassword" class="form-label">Confirm Password</label>
+                                <input 
+                                    type="password" 
+                                    id="confirmPassword" 
+                                    name="confirmPassword" 
+                                    class="form-control" 
+                                    placeholder="Confirm your password"
+                                    required
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary" style="width: 100%;">Create Account</button>
+                            </div>
+                        </form>
+
+                        <div style="text-align: center; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+                            <p style="color: var(--medium-gray); margin: 0;">
+                                Already have an account? 
+                                <a href="/auth/login" style="color: var(--primary-color); text-decoration: none; font-weight: 500;">Login</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Food Delivery System. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

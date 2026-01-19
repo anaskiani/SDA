@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Food Delivery</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/main.js" defer></script>
+</head>
+<body>
+    <% if (success) { %>
+    <div data-success="<%= success %>" style="display: none;"></div>
+    <% } %>
+    <% if (error) { %>
+    <div data-error="<%= error %>" style="display: none;"></div>
+    <% } %>
+
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>🍔 FoodDelivery</h1>
+            </div>
+            <div class="nav-links">
+                <span class="user-info">Welcome, <%= user.full_name %>!</span>
+                <a href="/customer/restaurants" class="btn btn-outline">Back to Restaurants</a>
+                <a href="/customer/cart" class="btn btn-primary">Cart</a>
+                <a href="/auth/logout" class="btn btn-outline">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="dashboard">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1 class="dashboard-title"><%= restaurant.restaurant_name %></h1>
+                <p class="dashboard-subtitle"><%= restaurant.description || 'Delicious food awaits!' %></p>
+            </div>
+
+            <div class="card" style="margin-bottom: 2rem;">
+                <div class="card-body">
+                    <div class="grid grid-2">
+                        <div>
+                            <p style="margin-bottom: 0.5rem;"><strong>📍 Address:</strong> <%= restaurant.address %></p>
+                            <p style="margin-bottom: 0.5rem;"><strong>📞 Phone:</strong> <%= restaurant.phone || restaurant.user_phone %></p>
+                        </div>
+                        <div>
+                            <p style="margin-bottom: 0.5rem;"><strong>🍽️ Cuisine:</strong> <%= restaurant.cuisine_type %></p>
+                            <p style="margin-bottom: 0.5rem;"><strong>🕐 Hours:</strong> <%= restaurant.opening_time %> - <%= restaurant.closing_time %></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <% if (menuItems && menuItems.length > 0) { %>
+                <% Object.keys(itemsByCategory).forEach(category => { %>
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title"><%= category %></h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="grid grid-2">
+                            <% itemsByCategory[category].forEach(item => { %>
+                            <div class="card" style="margin-bottom: 0;">
+                                <div class="card-body">
+                                    <div class="d-flex justify-between align-center" style="margin-bottom: 0.5rem;">
+                                        <h3 style="margin: 0; color: var(--dark-gray);"><%= item.item_name %></h3>
+                                        <span style="font-size: 1.2rem; font-weight: 600; color: var(--primary-color);">
+                                            $<%= parseFloat(item.price).toFixed(2) %>
+                                        </span>
+                                    </div>
+                                    <% if (item.description) { %>
+                                    <p style="color: var(--medium-gray); font-size: 0.9rem; margin-bottom: 1rem;">
+                                        <%= item.description %>
+                                    </p>
+                                    <% } %>
+                                    <form class="add-to-cart-form" style="display: flex; gap: 0.5rem; align-items: center;">
+                                        <input type="hidden" name="item_id" value="<%= item.item_id %>">
+                                        <input 
+                                            type="number" 
+                                            name="quantity" 
+                                            value="1" 
+                                            min="1" 
+                                            class="form-control" 
+                                            style="width: 80px;"
+                                            required
+                                        >
+                                        <button type="submit" class="btn btn-primary">Add to Cart</button>
+                                    </form>
+                                </div>
+                            </div>
+                            <% }); %>
+                        </div>
+                    </div>
+                </div>
+                <% }); %>
+            <% } else { %>
+            <div class="card">
+                <div class="card-body text-center">
+                    <p style="color: var(--medium-gray); font-size: 1.1rem;">
+                        This restaurant doesn't have any menu items available yet.
+                    </p>
+                </div>
+            </div>
+            <% } %>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Food Delivery System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Handle add to cart forms
+        const addToCartForms = document.querySelectorAll('.add-to-cart-form');
+        if (addToCartForms.length > 0) {
+            addToCartForms.forEach(form => {
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData);
+
+                try {
+                    const response = await fetch('/customer/cart/add', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        alert('Item added to cart!');
+                    } else {
+                        alert(result.error || 'Failed to add item to cart');
+                    }
+                } catch (error) {
+                    alert('An error occurred. Please try again.');
+                }
+            });
+        });
+        }
+    </script>
+</body>
+</html>

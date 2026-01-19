@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Food Delivery</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/main.js" defer></script>
+</head>
+<body>
+    <% if (success) { %>
+    <div data-success="<%= success %>" style="display: none;"></div>
+    <% } %>
+    <% if (error) { %>
+    <div data-error="<%= error %>" style="display: none;"></div>
+    <% } %>
+
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>🍔 FoodDelivery</h1>
+            </div>
+            <div class="nav-links">
+                <span class="user-info">Welcome, Anas Kiani!</span>
+                <a href="/admin/users" class="btn btn-outline">Users</a>
+                <a href="/admin/orders" class="btn btn-outline">Orders</a>
+                <a href="/admin/restaurants" class="btn btn-outline">Restaurants</a>
+                <a href="/admin/riders" class="btn btn-outline">Riders</a>
+                <a href="/auth/logout" class="btn btn-outline">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="dashboard">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">Admin Dashboard</h1>
+                <p class="dashboard-subtitle">System Overview and Management</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value"><%= stats.totalUsers %></div>
+                    <div class="stat-label">Total Users</div>
+                </div>
+                <div class="stat-card secondary">
+                    <div class="stat-value"><%= stats.totalCustomers %></div>
+                    <div class="stat-label">Customers</div>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-value"><%= stats.totalRestaurants %></div>
+                    <div class="stat-label">Restaurants</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);">
+                    <div class="stat-value"><%= stats.activeRestaurants %></div>
+                    <div class="stat-label">Active Restaurants</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value"><%= stats.totalRiders %></div>
+                    <div class="stat-label">Riders</div>
+                </div>
+                <div class="stat-card secondary">
+                    <div class="stat-value"><%= stats.activeRiders %></div>
+                    <div class="stat-label">Active Riders</div>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-value"><%= stats.totalOrders %></div>
+                    <div class="stat-label">Total Orders</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);">
+                    <div class="stat-value"><%= stats.pendingOrders %></div>
+                    <div class="stat-label">Pending Orders</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #28a745 0%, #218838 100%);">
+                    <div class="stat-value"><%= stats.completedOrders %></div>
+                    <div class="stat-label">Completed Orders</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);">
+                    <div class="stat-value">$<%= stats.totalRevenue %></div>
+                    <div class="stat-label">Total Revenue</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header d-flex justify-between align-center">
+                    <h2 class="card-title">Quick Actions</h2>
+                </div>
+                <div class="card-body">
+                    <div class="grid grid-4">
+                        <a href="/admin/users" class="card" style="text-decoration: none; color: inherit;">
+                            <h3 style="color: var(--primary-color); margin-bottom: 0.5rem;">👥 Users</h3>
+                            <p style="color: var(--medium-gray); margin: 0;">Manage all users</p>
+                        </a>
+                        <a href="/admin/orders" class="card" style="text-decoration: none; color: inherit;">
+                            <h3 style="color: var(--primary-color); margin-bottom: 0.5rem;">📦 Orders</h3>
+                            <p style="color: var(--medium-gray); margin: 0;">View all orders</p>
+                        </a>
+                        <a href="/admin/restaurants" class="card" style="text-decoration: none; color: inherit;">
+                            <h3 style="color: var(--primary-color); margin-bottom: 0.5rem;">🍽️ Restaurants</h3>
+                            <p style="color: var(--medium-gray); margin: 0;">Manage restaurants</p>
+                        </a>
+                        <a href="/admin/riders" class="card" style="text-decoration: none; color: inherit;">
+                            <h3 style="color: var(--primary-color); margin-bottom: 0.5rem;">🚚 Riders</h3>
+                            <p style="color: var(--medium-gray); margin: 0;">Manage riders</p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <% if (recentOrders && recentOrders.length > 0) { %>
+            <div class="card">
+                <div class="card-header d-flex justify-between align-center">
+                    <h2 class="card-title">Recent Orders</h2>
+                    <a href="/admin/orders" class="btn btn-outline btn-small">View All</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Customer</th>
+                                    <th>Restaurant</th>
+                                    <th>Rider</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% recentOrders.forEach(order => { %>
+                                <tr>
+                                    <td>#<%= order.order_id %></td>
+                                    <td><%= order.customer_name %></td>
+                                    <td><%= order.restaurant_name %></td>
+                                    <td><%= order.rider_name || 'Not assigned' %></td>
+                                    <td>$<%= parseFloat(order.total_amount).toFixed(2) %></td>
+                                    <td>
+                                        <span class="badge badge-<%= order.order_status %>">
+                                            <%= order.order_status %>
+                                        </span>
+                                    </td>
+                                    <td><%= new Date(order.created_at).toLocaleDateString() %></td>
+                                    <td>
+                                        <a href="/admin/orders/<%= order.order_id %>" class="btn btn-outline btn-small">View</a>
+                                    </td>
+                                </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <% } %>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Food Delivery System. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

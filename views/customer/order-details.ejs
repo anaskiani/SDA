@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Food Delivery</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/main.js" defer></script>
+</head>
+<body>
+    <% if (success) { %>
+    <div data-success="<%= success %>" style="display: none;"></div>
+    <% } %>
+    <% if (error) { %>
+    <div data-error="<%= error %>" style="display: none;"></div>
+    <% } %>
+
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>🍔 FoodDelivery</h1>
+            </div>
+            <div class="nav-links">
+                <span class="user-info">Welcome, <%= user.full_name %>!</span>
+                <a href="/customer/orders" class="btn btn-outline">Back to Orders</a>
+                <a href="/auth/logout" class="btn btn-outline">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="dashboard">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">Order #<%= order.order_id %></h1>
+                <p class="dashboard-subtitle">Order Details</p>
+            </div>
+
+            <div class="grid grid-2">
+                <div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Order Information</h2>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Status:</strong> 
+                                <span class="badge badge-<%= order.order_status %>">
+                                    <%= order.order_status %>
+                                </span>
+                            </p>
+                            <p><strong>Restaurant:</strong> <%= order.restaurant_name %></p>
+                            <p><strong>Order Date:</strong> <%= new Date(order.created_at).toLocaleString() %></p>
+                            <% if (order.rider_name) { %>
+                            <p><strong>Rider:</strong> <%= order.rider_name %></p>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Delivery Address</h2>
+                        </div>
+                        <div class="card-body">
+                            <p><%= order.delivery_address %></p>
+                            <% if (order.special_instructions) { %>
+                            <p style="margin-top: 1rem;"><strong>Special Instructions:</strong></p>
+                            <p><%= order.special_instructions %></p>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <% if (order.payment) { %>
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Payment Information</h2>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Payment Method:</strong> <%= order.payment.payment_method %></p>
+                            <p><strong>Payment Status:</strong> 
+                                <span class="badge badge-<%= order.payment.payment_status %>">
+                                    <%= order.payment.payment_status %>
+                                </span>
+                            </p>
+                            <p><strong>Amount Paid:</strong> $<%= parseFloat(order.payment.amount).toFixed(2) %></p>
+                        </div>
+                    </div>
+                    <% } %>
+                </div>
+
+                <div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Order Items</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Item</th>
+                                            <th>Quantity</th>
+                                            <th>Price</th>
+                                            <th>Subtotal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% order.items.forEach(item => { %>
+                                        <tr>
+                                            <td><%= item.item_name %></td>
+                                            <td><%= item.quantity %></td>
+                                            <td>$<%= parseFloat(item.price).toFixed(2) %></td>
+                                            <td>$<%= parseFloat(item.subtotal).toFixed(2) %></td>
+                                        </tr>
+                                        <% }); %>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr style="font-weight: 600; font-size: 1.1rem;">
+                                            <td colspan="3">Total:</td>
+                                            <td>$<%= parseFloat(order.total_amount).toFixed(2) %></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex gap-2" style="flex-wrap: wrap;">
+                                <% if (canCancel) { %>
+                                <form method="POST" action="/customer/orders/<%= order.order_id %>/cancel" style="display: inline;">
+                                    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to cancel this order?');">
+                                        Cancel Order
+                                    </button>
+                                </form>
+                                <% } %>
+                                
+                                <% if (typeof canMarkReceived !== 'undefined' && canMarkReceived) { %>
+                                <button id="mark-received-btn" class="btn btn-success">
+                                    Mark as Received
+                                </button>
+                                <% } %>
+                                
+                                <% if (canRate && !hasRating) { %>
+                                <a href="/customer/orders/<%= order.order_id %>/rate" class="btn btn-primary">
+                                    Rate Order
+                                </a>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Food Delivery System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Mark as received button
+        const markReceivedBtn = document.getElementById('mark-received-btn');
+        if (markReceivedBtn) {
+            markReceivedBtn.addEventListener('click', async function() {
+                if (!confirm('Mark this order as received?')) return;
+                
+                this.disabled = true;
+                this.textContent = 'Updating...';
+
+                try {
+                    const response = await fetch('/customer/orders/<%= order.order_id %>/received', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        alert('Order marked as received!');
+                        location.reload();
+                    } else {
+                        alert(result.error || 'Failed to update order status');
+                        this.disabled = false;
+                        this.textContent = 'Mark as Received';
+                    }
+                } catch (error) {
+                    alert('An error occurred. Please try again.');
+                    this.disabled = false;
+                    this.textContent = 'Mark as Received';
+                }
+            });
+        }
+
+        // Auto-refresh order status every 5 seconds
+        setInterval(() => {
+            fetch('/customer/orders/<%= order.order_id %>')
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const statusBadge = doc.querySelector('.badge');
+                    if (statusBadge) {
+                        const currentBadge = document.querySelector('.badge');
+                        if (currentBadge && currentBadge.textContent !== statusBadge.textContent) {
+                            location.reload();
+                        }
+                    }
+                })
+                .catch(err => console.log('Status check failed'));
+        }, 5000);
+    </script>
+</body>
+</html>

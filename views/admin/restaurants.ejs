@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Food Delivery</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/main.js" defer></script>
+</head>
+<body>
+    <% if (success) { %>
+    <div data-success="<%= success %>" style="display: none;"></div>
+    <% } %>
+    <% if (error) { %>
+    <div data-error="<%= error %>" style="display: none;"></div>
+    <% } %>
+
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>🍔 FoodDelivery</h1>
+            </div>
+            <div class="nav-links">
+                <span class="user-info">Welcome, <%= user.full_name %>!</span>
+                <a href="/admin/dashboard" class="btn btn-outline">Dashboard</a>
+                <a href="/auth/logout" class="btn btn-outline">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="dashboard">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">Restaurant Management</h1>
+                <p class="dashboard-subtitle">Manage all restaurants</p>
+            </div>
+
+            <% if (restaurants && restaurants.length > 0) { %>
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Restaurant Name</th>
+                                    <th>Owner</th>
+                                    <th>Cuisine</th>
+                                    <th>Address</th>
+                                    <th>Phone</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% restaurants.forEach(restaurant => { %>
+                                <tr>
+                                    <td><%= restaurant.restaurant_id %></td>
+                                    <td><strong><%= restaurant.restaurant_name %></strong></td>
+                                    <td><%= restaurant.owner_name %></td>
+                                    <td><%= restaurant.cuisine_type || 'N/A' %></td>
+                                    <td><%= restaurant.address %></td>
+                                    <td><%= restaurant.phone || restaurant.user_phone || 'N/A' %></td>
+                                    <td>
+                                        <% if (restaurant.is_active) { %>
+                                            <span class="badge badge-delivered">Active</span>
+                                        <% } else { %>
+                                            <span class="badge badge-cancelled">Inactive</span>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <button 
+                                            class="btn <%= restaurant.is_active ? 'btn-danger' : 'btn-success' %> btn-small toggle-status" 
+                                            data-restaurant-id="<%= restaurant.restaurant_id %>"
+                                            data-current-status="<%= restaurant.is_active %>"
+                                        >
+                                            <%= restaurant.is_active ? 'Deactivate' : 'Activate' %>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <% } else { %>
+            <div class="card">
+                <div class="card-body text-center">
+                    <p style="color: var(--medium-gray); font-size: 1.1rem;">
+                        No restaurants found.
+                    </p>
+                </div>
+            </div>
+            <% } %>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Food Delivery System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Toggle restaurant status
+        const toggleBtns = document.querySelectorAll('.toggle-status');
+        if (toggleBtns.length > 0) {
+            toggleBtns.forEach(btn => {
+            btn.addEventListener('click', async function() {
+                const restaurantId = this.dataset.restaurantId;
+                const currentStatus = this.dataset.currentStatus === 'true';
+                const action = currentStatus ? 'deactivate' : 'activate';
+                
+                if (!confirm(`Are you sure you want to ${action} this restaurant?`)) return;
+                
+                try {
+                    const response = await fetch(`/admin/restaurants/${restaurantId}/toggle-status`, {
+                        method: 'POST'
+                    });
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        alert(result.message);
+                        location.reload();
+                    } else {
+                        alert(result.error || 'Failed to update restaurant status');
+                    }
+                } catch (error) {
+                    alert('An error occurred. Please try again.');
+                }
+            });
+        });
+        }
+    </script>
+</body>
+</html>

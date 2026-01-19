@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Food Delivery</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/main.js" defer></script>
+</head>
+<body>
+    <% if (success) { %>
+    <div data-success="<%= success %>" style="display: none;"></div>
+    <% } %>
+    <% if (error) { %>
+    <div data-error="<%= error %>" style="display: none;"></div>
+    <% } %>
+
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>🍔 FoodDelivery</h1>
+            </div>
+            <div class="nav-links">
+                <span class="user-info">Welcome, <%= user.full_name %>!</span>
+                <a href="/admin/dashboard" class="btn btn-outline">Dashboard</a>
+                <a href="/auth/logout" class="btn btn-outline">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="dashboard">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">User Management</h1>
+                <p class="dashboard-subtitle">View and manage all users</p>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex gap-2" style="flex-wrap: wrap; margin-bottom: 1rem;">
+                        <a href="/admin/users?role=all" class="btn <%= roleFilter === 'all' ? 'btn-primary' : 'btn-outline' %>">All</a>
+                        <a href="/admin/users?role=customer" class="btn <%= roleFilter === 'customer' ? 'btn-primary' : 'btn-outline' %>">Customers</a>
+                        <a href="/admin/users?role=restaurant" class="btn <%= roleFilter === 'restaurant' ? 'btn-primary' : 'btn-outline' %>">Restaurants</a>
+                        <a href="/admin/users?role=rider" class="btn <%= roleFilter === 'rider' ? 'btn-primary' : 'btn-outline' %>">Riders</a>
+                        <a href="/admin/users?role=admin" class="btn <%= roleFilter === 'admin' ? 'btn-primary' : 'btn-outline' %>">Admins</a>
+                    </div>
+                </div>
+            </div>
+
+            <% if (users && users.length > 0) { %>
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>User ID</th>
+                                    <th>Username</th>
+                                    <th>Full Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Phone</th>
+                                    <th>Created</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% users.forEach(u => { %>
+                                <tr>
+                                    <td><%= u.user_id %></td>
+                                    <td><%= u.username %></td>
+                                    <td><%= u.full_name %></td>
+                                    <td><%= u.email %></td>
+                                    <td>
+                                        <span class="badge" style="background-color: var(--info-color); color: white;">
+                                            <%= u.role %>
+                                        </span>
+                                    </td>
+                                    <td><%= u.phone || 'N/A' %></td>
+                                    <td><%= new Date(u.created_at).toLocaleDateString() %></td>
+                                </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <% } else { %>
+            <div class="card">
+                <div class="card-body text-center">
+                    <p style="color: var(--medium-gray); font-size: 1.1rem;">
+                        No users found for the selected filter.
+                    </p>
+                </div>
+            </div>
+            <% } %>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Food Delivery System. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

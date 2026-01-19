@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Food Delivery</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/main.js" defer></script>
+</head>
+<body>
+    <% if (success) { %>
+    <div data-success="<%= success %>" style="display: none;"></div>
+    <% } %>
+    <% if (error) { %>
+    <div data-error="<%= error %>" style="display: none;"></div>
+    <% } %>
+
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>🍔 FoodDelivery</h1>
+            </div>
+            <div class="nav-links">
+                <span class="user-info">Welcome, <%= restaurant.restaurant_name %>!</span>
+                <a href="/restaurant/dashboard" class="btn btn-outline">Dashboard</a>
+                <a href="/restaurant/orders" class="btn btn-outline">Orders</a>
+                <a href="/auth/logout" class="btn btn-outline">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="dashboard">
+        <div class="container">
+            <div class="dashboard-header d-flex justify-between align-center">
+                <div>
+                    <h1 class="dashboard-title">Menu Management</h1>
+                    <p class="dashboard-subtitle">Manage your menu items</p>
+                </div>
+                <a href="/restaurant/menu/add" class="btn btn-primary">Add Menu Item</a>
+            </div>
+
+            <% if (menuItems && menuItems.length > 0) { %>
+                <% Object.keys(itemsByCategory).forEach(category => { %>
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title"><%= category %></h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Item Name</th>
+                                        <th>Description</th>
+                                        <th>Price</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% itemsByCategory[category].forEach(item => { %>
+                                    <tr>
+                                        <td><strong><%= item.item_name %></strong></td>
+                                        <td><%= item.description || 'No description' %></td>
+                                        <td>$<%= parseFloat(item.price).toFixed(2) %></td>
+                                        <td>
+                                            <% if (item.is_available) { %>
+                                                <span class="badge badge-delivered">Available</span>
+                                            <% } else { %>
+                                                <span class="badge badge-cancelled">Unavailable</span>
+                                            <% } %>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex gap-1">
+                                                <a href="/restaurant/menu/edit/<%= item.item_id %>" class="btn btn-outline btn-small">Edit</a>
+                                                <button class="btn btn-danger btn-small delete-item" data-item-id="<%= item.item_id %>" data-item-name="<%= item.item_name %>">
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <% }); %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <% }); %>
+            <% } else { %>
+            <div class="card">
+                <div class="card-body text-center">
+                    <p style="color: var(--medium-gray); font-size: 1.1rem; margin-bottom: 1rem;">
+                        No menu items yet. Add your first menu item to get started!
+                    </p>
+                    <a href="/restaurant/menu/add" class="btn btn-primary">Add Menu Item</a>
+                </div>
+            </div>
+            <% } %>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Food Delivery System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Delete menu item
+        const deleteBtns = document.querySelectorAll('.delete-item');
+        if (deleteBtns.length > 0) {
+            deleteBtns.forEach(btn => {
+            btn.addEventListener('click', async function() {
+                const itemId = this.dataset.itemId;
+                const itemName = this.dataset.itemName;
+                
+                if (!confirm(`Delete "${itemName}"? This will make it unavailable to customers.`)) return;
+                
+                try {
+                    const response = await fetch(`/restaurant/menu/delete/${itemId}`, {
+                        method: 'DELETE'
+                    });
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        alert('Menu item deleted successfully');
+                        location.reload();
+                    } else {
+                        alert(result.error || 'Failed to delete menu item');
+                    }
+                } catch (error) {
+                    alert('An error occurred. Please try again.');
+                }
+            });
+        });
+        }
+    </script>
+</body>
+</html>

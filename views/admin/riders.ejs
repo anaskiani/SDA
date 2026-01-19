@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - Food Delivery</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/main.js" defer></script>
+</head>
+<body>
+    <% if (success) { %>
+    <div data-success="<%= success %>" style="display: none;"></div>
+    <% } %>
+    <% if (error) { %>
+    <div data-error="<%= error %>" style="display: none;"></div>
+    <% } %>
+
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>🍔 FoodDelivery</h1>
+            </div>
+            <div class="nav-links">
+                <span class="user-info">Welcome, <%= user.full_name %>!</span>
+                <a href="/admin/dashboard" class="btn btn-outline">Dashboard</a>
+                <a href="/auth/logout" class="btn btn-outline">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="dashboard">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">Rider Management</h1>
+                <p class="dashboard-subtitle">Manage all riders</p>
+            </div>
+
+            <% if (riders && riders.length > 0) { %>
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Vehicle</th>
+                                    <th>License</th>
+                                    <th>Available</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% riders.forEach(rider => { %>
+                                <tr>
+                                    <td><%= rider.rider_id %></td>
+                                    <td><strong><%= rider.full_name %></strong></td>
+                                    <td><%= rider.email %></td>
+                                    <td><%= rider.user_phone || 'N/A' %></td>
+                                    <td><%= rider.vehicle_type || 'N/A' %></td>
+                                    <td><%= rider.license_number || 'N/A' %></td>
+                                    <td>
+                                        <% if (rider.is_available) { %>
+                                            <span class="badge badge-delivered">Available</span>
+                                        <% } else { %>
+                                            <span class="badge badge-cancelled">Unavailable</span>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <% if (rider.is_active) { %>
+                                            <span class="badge badge-delivered">Active</span>
+                                        <% } else { %>
+                                            <span class="badge badge-cancelled">Inactive</span>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <button 
+                                            class="btn <%= rider.is_active ? 'btn-danger' : 'btn-success' %> btn-small toggle-status" 
+                                            data-rider-id="<%= rider.rider_id %>"
+                                            data-current-status="<%= rider.is_active %>"
+                                        >
+                                            <%= rider.is_active ? 'Deactivate' : 'Activate' %>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <% } else { %>
+            <div class="card">
+                <div class="card-body text-center">
+                    <p style="color: var(--medium-gray); font-size: 1.1rem;">
+                        No riders found.
+                    </p>
+                </div>
+            </div>
+            <% } %>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Food Delivery System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Toggle rider status
+        const toggleBtns = document.querySelectorAll('.toggle-status');
+        if (toggleBtns.length > 0) {
+            toggleBtns.forEach(btn => {
+            btn.addEventListener('click', async function() {
+                const riderId = this.dataset.riderId;
+                const currentStatus = this.dataset.currentStatus === 'true';
+                const action = currentStatus ? 'deactivate' : 'activate';
+                
+                if (!confirm(`Are you sure you want to ${action} this rider?`)) return;
+                
+                try {
+                    const response = await fetch(`/admin/riders/${riderId}/toggle-status`, {
+                        method: 'POST'
+                    });
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        alert(result.message);
+                        location.reload();
+                    } else {
+                        alert(result.error || 'Failed to update rider status');
+                    }
+                } catch (error) {
+                    alert('An error occurred. Please try again.');
+                }
+            });
+        });
+        }
+    </script>
+</body>
+</html>
